@@ -43,7 +43,7 @@ DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 # prevents sublime from becoming unresponsive
 MAX_REPEATS = 1000000
 
-class NRepeatCommand(sublime_plugin.EventListener):
+class RepeatCommand(sublime_plugin.EventListener):
     def __init__(self):
         # the view that called our command
         self.calling_view = None
@@ -80,7 +80,7 @@ class NRepeatCommand(sublime_plugin.EventListener):
             if command_name == "cancel":
                 # reset
                 self.__init__()
-            elif command_name == "n_repeat":
+            elif command_name == "repeat":
                 self.call_count += 1
                 if self.call_count >= 3 and self.number_string != "":
                     self.number_string = ""
@@ -96,7 +96,7 @@ class NRepeatCommand(sublime_plugin.EventListener):
             return "repeat_empty", args
         else: #self.state == STATE_LISTENING
             # this command has been called
-            if command_name == "n_repeat":
+            if command_name == "repeat":
                 self.calling_view = view
                 self.state = STATE_RUNNING
                 self.call_count = 1
