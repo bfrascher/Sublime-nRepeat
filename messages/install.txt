@@ -1,0 +1,12 @@
+nRepeat Plugin version 0.1.0 (2014-03-10)
+
+Thank you for installing the nRepeat plugin!
+
+Before you start using the plugin, please read through
+the README.md provided with the plugin, or read it at:
+
+https://github.com/bfrascher/Sublime-nRepeat
+
+and scroll down to the README file.
+
+Have fun with the plugin!
