@@ -1,0 +1,5 @@
+*.pyc
+*.sublime-project
+*.sublime-workspace
+*-dev.py
+package-metadata.json
