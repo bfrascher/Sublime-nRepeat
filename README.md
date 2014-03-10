@@ -3,8 +3,8 @@ Sublime-nRepeat
 
 A port of the repeat functionality of the universal-argument from Emacs to SublimeText3.
 
-# WARNING
-Do NOT use this plugin, while you have selected a region in the editor, as it will be overwritten!
+## WARNING
+Do NOT use the command provided in this plugin, while you have selected a region in the editor, as it will be overwritten!
 
 ## Version
 This is the initial version of this plugin. Apart from the problem with selected regions (see warning above), it worked well for me with SublimeText3 Build 3059 (x64), but I wasn't able to test it extensively. So beware of bugs!
