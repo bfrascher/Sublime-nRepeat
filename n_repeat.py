@@ -27,9 +27,8 @@ import sublime, sublime_plugin
 
 # the states the listener can be in
 # while listening: waits for command 'repeat' and ignores all other commands
-# while paused   : redirects all commands to 'repeat_empty', preventing
-#                  them from being executed (will only be active for a couple of ms
-#                  and should only affect commands issued from this plugin)
+# while paused   : on_text_command passes on all commands unchanged, waiting
+#                  for on_modified to finish up
 # while running  : reads the times to repeat from the user input and finally repeats
 #                  the last command/character the given number of times
 STATE_LISTENING = 0
@@ -75,7 +74,8 @@ class RepeatCommand(sublime_plugin.EventListener):
     # on commands, that should only affect this plugin
     def on_text_command(self, view, command_name, args):
         if self.state == STATE_PAUSED:
-            return "repeat_empty", args
+            # waiting for on_modified to finish up
+            pass
         elif self.state == STATE_RUNNING:
             if command_name == "cancel":
                 # reset
