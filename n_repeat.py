@@ -17,12 +17,7 @@
 # 3) 'repeat... (n times) -> non-digit/command' repeats non-digit/command 4^n times
 # 4) 'repeat -> digits... -> non-digit/command' repeats non-digit/command digits... times
 
-# WARNING -- DO NOT HAVE A REGION SELECTED WHEN RUNNING THIS COMMAND
-# As I haven't found a way to intercept user input, before it is entered into the view, this plugin
-# will copy the last inserted character and then delete it from the view. That means, if you have
-# a region selected, that region will be overwritten by the first character input after this command
-# and then deleted.
-
+import copy
 import sublime, sublime_plugin
 
 # the states the listener can be in
@@ -70,6 +65,34 @@ class RepeatCommand(sublime_plugin.EventListener):
             repeats = 4**self.call_count
         return min(repeats, MAX_REPEATS)
 
+    # extract_selection copies all selected regions from
+    # self.calling_view and removes them
+    # for a better user experience the caret stays in place
+    # so it looks like only the region disappears for the
+    # duration of this command
+    def extract_selection(self):
+        selection = self.calling_view.sel()
+        self.selection = []
+        for region in selection:
+            selection.subtract(region)
+            selection.add(sublime.Region(region.b, region.b))
+            self.selection.append(region)
+
+    # restore_selection clears the temporary selections set int
+    # extract_selection from self.calling_view and restores the
+    # ones set before this command was run
+    def restore_selection(self):
+        selection = self.calling_view.sel()
+        selection.clear()
+        for region in self.selection:
+            selection.add(region)
+        del self.selection
+
+    # reset resets any non-user modifications made to self.calling_view
+    # called on canceling the command or before the repeat loop gets executed
+    def reset(self):
+        self.restore_selection()
+
     # returning 'repeat_empty' prevents on_modified from being called
     # on commands, that should only affect this plugin
     def on_text_command(self, view, command_name, args):
@@ -77,10 +100,7 @@ class RepeatCommand(sublime_plugin.EventListener):
             # waiting for on_modified to finish up
             pass
         elif self.state == STATE_RUNNING:
-            if command_name == "cancel":
-                # reset
-                self.__init__()
-            elif command_name == "repeat":
+            if command_name == "repeat":
                 self.call_count += 1
                 if self.call_count >= 3 and self.number_string != "":
                     self.number_string = ""
@@ -89,6 +109,7 @@ class RepeatCommand(sublime_plugin.EventListener):
                 repeats = self.get_repeats()
                 # preventing on_modified to be called on these modifications
                 self.state = STATE_PAUSED
+                self.reset()
                 for i in range(repeats):
                         self.calling_view.run_command(command_name, args)
                 # reset
@@ -98,6 +119,7 @@ class RepeatCommand(sublime_plugin.EventListener):
             # this command has been called
             if command_name == "repeat":
                 self.calling_view = view
+                self.extract_selection()
                 self.state = STATE_RUNNING
                 self.call_count = 1
                 return "repeat_empty", args
@@ -120,9 +142,10 @@ class RepeatCommand(sublime_plugin.EventListener):
                     self.call_count = 1
                 else:
                     repeats = self.get_repeats()
+                    self.reset()
                     # insert char repeat times at each position
                     for pos in self.calling_view.sel():
-                        self.calling_view.run_command("repeat_insert",{"pos": str(pos.begin()), "s": char*repeats})
+                        self.calling_view.run_command("repeat_insert",{"pos": str(pos.b), "s": char*repeats})
                     # reset
                     self.__init__()
 
@@ -130,7 +153,7 @@ class RepeatCommand(sublime_plugin.EventListener):
 # RepeatEmptyCommand is a TextCommand that does nothing.
 # This is important, on_modified is not called, when running it.
 # So we can redirect all commands here, when we don't want the view
-# to get modified (espacially for RepeatCommand itself).
+# to get modified (especially for RepeatCommand itself).
 class RepeatEmtpyCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         return
