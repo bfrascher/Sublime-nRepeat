@@ -1,0 +1,9 @@
+nRepeat Plugin version 0.1.2 (2014-03-15)
+
+Fixed the issue where selected text would be deleted, when running this plugin.
+
+Instead your text selections will now temporarily disappear when starting the
+command and reappear on ending it. When inserting characters, while having a
+region selected, the characters will be inserted in front of or behind the
+region, always nearest to your text cursor. This works with multiple
+selection regions.
